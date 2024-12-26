@@ -1,6 +1,6 @@
 import axios from "../utils/axios.js";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Signup = () => {
     const [credential, setCredential] = useState({});
@@ -23,9 +23,9 @@ const Signup = () => {
             const res = await axios.post("/signup", credential, {
                 withCredentials: true,
             });
-            navigate('/login')
+            navigate("/login");
         } catch (e) {
-          console.log(e)
+            console.log(e);
             setError("Oops! Something went wrong.");
             return;
         }
@@ -103,6 +103,13 @@ const Signup = () => {
                     className="p-2 rounded-md border-b-2 border-teal-600 outline-none"
                     required
                 />
+
+                <small className="text-sm">
+                    Already have an account?{" "}
+                    <Link to="/login" className="text-teal-600">
+                        Login
+                    </Link>
+                </small>
 
                 <button
                     type="submit"

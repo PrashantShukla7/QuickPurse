@@ -5,7 +5,8 @@ const crypto = require("crypto");
 const bcrypt = require("bcryptjs");  // package to hash passwords
 const jwt = require("jsonwebtoken");
 const cookieParser = require('cookie-parser')
-const cors = require('cors')
+const cors = require('cors');
+const verifyToken = require("./verfiyToken");
 
 const app = express();
 
@@ -58,6 +59,12 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+    transactions: [
+        {
+            type: mongoose.Types.ObjectId,
+            ref: "Transactions",
+        }
+    ]
 });
 
 const User = mongoose.model("User", userSchema);
@@ -78,10 +85,13 @@ const transactionSchema = new mongoose.Schema({
     },
 });
 
+const Transaction = mongoose.model("Transactions", transactionSchema);
+
 
 // function to generate unique UPI IDs
 const generateUPI = (length = 5) => {
-    return crypto.randomBytes(5).toString("hex")
+    const id = crypto.randomBytes(5).toString("hex")
+    return `${id}@quickpurse`
 }
 
 //routes
@@ -125,12 +135,59 @@ app.post("/api/login", async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        const token = jwt.sign({ ...user._doc }, process.env.JWT_SECRET, { expiresIn: "1h" });
         res.cookie("access_token", token).status(200).json({ user });
         
     } catch (err){
         console.log(err)
         res.status(500).json({message: "Oops! Something went wrong."})
+    }
+})
+
+app.get('/api/auth/me', verifyToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json({ user });
+      } catch (error) {
+        res.status(500).json({ message: 'Something went wrong' });
+      }    
+})
+
+app.post('/api/send', verifyToken, async (req, res) => {
+    try {
+        const {upiId, amount} = req.body;
+        const receiver = await User.findOne({upiId})
+        const sender = await User.findById(req.user._id)
+        receiver.balance = Number(receiver.balance) + Number(amount);
+        sender.balance -= Number(amount);
+        const transaction = new Transaction({
+            sender_upi_id: sender.upiId,
+            receiver_upi_id: receiver.upiId,
+            amount,
+        })
+        sender.transactions.push(transaction)
+        receiver.transactions.push(transaction)
+        await receiver.save();
+        await sender.save();
+        await transaction.save();
+        res.status(200).json({message: "Transaction successful"})
+    } catch (err) {
+        res.status(500).json(err.message)
+    }
+})
+
+app.get('/api/transactions/:id', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id).populate('transactions');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json({ transactions: user.transactions });
+    } catch (error) {
+        res.status(500).json({ message: 'Something went wrong' });
     }
 })
 

@@ -1,16 +1,17 @@
 import axios from "../utils/axios.js";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext.jsx";
 
 const Login = () => {
     const [credential, setCredential] = useState({});
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const {checkAuth} = useContext(AuthContext)
 
     const handleInputChange = (e) => {
         setCredential({ ...credential, [e.target.name]: e.target.value });
     };
-    console.log(credential)
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -18,6 +19,7 @@ const Login = () => {
             const res = await axios.post("/login", credential, {
                 withCredentials: true,
             });
+            await checkAuth();
             navigate("/");
         } catch (error) {
             console.log(error);
@@ -67,6 +69,13 @@ const Login = () => {
                     className="p-2 rounded-md border-b-2 border-teal-600 outline-none"
                     onChange={handleInputChange}
                 />
+
+                <small className="text-sm">
+                    Already have an account?{" "}
+                    <Link to="/signup" className="text-teal-600">
+                        Sign Up
+                    </Link>
+                </small>
 
                 <button
                     type="submit"
