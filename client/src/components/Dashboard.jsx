@@ -13,7 +13,7 @@ const Dashboard = () => {
     useEffect(() => {
         const getTransactions = async () => {
             const res = await axios.get(`/transactions/${user._id}`);
-            setTransactions(res.data.transactions);
+            setTransactions(res.data.transactions.reverse());
         };
         getTransactions();
     }, []);
@@ -43,6 +43,17 @@ const Dashboard = () => {
         }
     };
 
+    const getReceiver = async (upiId) => {
+        try {
+            const res = await axios.get(`/user/${upiId}`);
+            console.log(res.data.user.name)
+            return res.data.user.name;
+        } catch (e) {
+            console.log(e);
+            return null;
+        }
+    }
+
     return (
         <>
             <Navbar />
@@ -51,9 +62,14 @@ const Dashboard = () => {
                     <p className="text-[#63748a] mb-3">Total Balance</p>
                     <h1 className="font-bold text-3xl">₹ {user.balance}</h1>
                 </div>
-                <div className="flex rounded bg-white w-fit pl-6 pt-6 pb-10 pr-16 mt-7 items-center gap-x-5">
+                <div className="flex rounded bg-white w-fit pl-6 pt-6 pb-10 pr-16 mt-7 items-center gap-x-5 shadow-sm">
                     <div className="w-10 h-10 rounded-full bg-[#3b82f6]"></div>
-                    <p  onClick={() => setOpenModal(prev => !prev)} className="cursor-pointer">Send Money</p>
+                    <p
+                        onClick={() => setOpenModal((prev) => !prev)}
+                        className="cursor-pointer"
+                    >
+                        Send Money
+                    </p>
                 </div>
                 <div className="mt-7">
                     <h3 className="text-2xl font-semibold">
@@ -68,10 +84,9 @@ const Dashboard = () => {
                                     <div className="flex items-center">
                                         <div className="w-7 h-7 rounded-full bg-[#f6c23e] mr-3"></div>
                                         <p className="text-lg">
-                                            {transaction.sender_upi_id ===
-                                            user.upiId
+                                            {transaction.sender_upi_id === user.upiId
                                                 ? transaction.receiver_upi_id
-                                                : user.name}
+                                                : transaction.sender_upi_id}
                                         </p>
                                     </div>
                                     <div>
@@ -100,33 +115,70 @@ const Dashboard = () => {
                 </div>
 
                 {openModal && (
-                    <div className="absolute top-[20%] left-[35%] bg-white rounded-md p-10 ">
+                    <div className="absolute top-[5%] md:left-[35%] bg-[#ffffff] rounded-md p-10 md:w-[35%] w-full shadow-md">
                         <h3 className="text-2xl font-semibold">
-                            Transfer Money
+                            Send Money
                         </h3>
                         <hr className="bg-[#e2e8f0] h-1 my-3" />
+                        {error && (
+                            <div className="bg-[#f871716e] px-4 py-2 rounded-md border-2 border-red-600 flex justify-between">
+                                <p className="text-red-700">{error}</p>
+                                <i
+                                    className="ri-close-large-fill text-red-700 cursor-pointer"
+                                    title="close"
+                                    onClick={() => setError(null)}
+                                ></i>
+                            </div>
+                        )}
+                        {transactionSuccess && (
+                            <div className="bg-[#88e14c61] px-4 py-2 rounded-md border-2 border-green-600 flex justify-between">
+                                <p className="text-green-700">{transactionSuccess}</p>
+                                <i
+                                    className="ri-close-large-fill text-green-700 cursor-pointer"
+                                    title="close"
+                                    onClick={() => setTransactionSuccess(null)}
+                                ></i>
+                            </div>
+                        )}
                         <form
                             className="flex flex-col gap-y-3"
                             onSubmit={handleSendMoney}
                         >
-                            <label htmlFor="upiId">Receipent's UPI ID</label>
+                            <label htmlFor="upiId" className="text-[#5c5c5c]">
+                                Receipent's UPI ID
+                            </label>
                             <input
                                 type="text"
                                 placeholder="Enter receiver's upiId"
                                 name="upiId"
                                 onChange={handleTransactionInputChange}
-                                className="mt-3 p-2 rounded bg-[#1e293b]"
+                                className="p-2 rounded bg-[#f8fafc] border-2 outline-none"
                             />
-                            <label htmlFor="amount">Amount</label>
+                            <label htmlFor="amount" className="text-[#5c5c5c]">
+                                Amount
+                            </label>
                             <input
                                 type="number"
                                 placeholder="Enter amount"
                                 name="amount"
                                 onChange={handleTransactionInputChange}
+                                className="p-2 rounded bg-[#f8fafc] border-2 border-[##f9fafc] outline-none"
                             />
-                            <small>Available Balance: ₹{user.balance}</small>
-                            <button type="submit">Send</button>
-                            <button onClick={() => setOpenModal(prev => !prev)}>Cancel</button>
+                            <small className="text-[#5c5c5c]">
+                                Available Balance: ₹{user.balance}
+                            </small>
+                            <button
+                                type="submit"
+                                className="bg-blue-500 rounded-md p-2 text-white"
+                            >
+                                Send Money
+                            </button>
+                            <button
+                                onClick={() => setOpenModal((prev) => !prev)}
+                                className="bg-gray-200 p-2 rounded-md"
+                            >
+                                Cancel
+                            </button>
                         </form>
                     </div>
                 )}

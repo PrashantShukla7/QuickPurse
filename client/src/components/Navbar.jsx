@@ -22,7 +22,7 @@ const Navbar = () => {
                         <Link to="/">Dashboard</Link>
                     </li>
                     <li className="cursor-pointer hover:text-[#293038]">
-                        Profile
+                        <Link to="/profile">Profile</Link>
                     </li>
                 </ul>
             ) : (
