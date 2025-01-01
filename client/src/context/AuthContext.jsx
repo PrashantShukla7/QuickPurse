@@ -1,6 +1,6 @@
 // context/AuthContext.js
 import React, { createContext, useState, useContext, useEffect } from "react";
-import axios from "../utils/axios";
+import axios from "../utils/axios.js";
 
 export const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            await axios.post("/api/auth/logout");
+            await axios.post("/logout");
             setAuth({
                 isAuthenticated: false,
                 user: null,

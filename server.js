@@ -83,6 +83,10 @@ const transactionSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    date: {
+        type: Date,
+        default: Date.now,
+    }
 });
 
 const Transaction = mongoose.model("Transactions", transactionSchema);
@@ -144,6 +148,12 @@ app.post("/api/login", async (req, res) => {
     }
 })
 
+app.post('/api/logout', (req, res) => {
+    res.clearCookie('access_token', { httpOnly: true, sameSite: 'lax' });
+    res.status(200).json({ message: "Logged out successfully" });
+});
+
+
 app.get('/api/auth/me', verifyToken, async (req, res) => {
     try {
         const user = await User.findById(req.user._id);
@@ -188,6 +198,16 @@ app.get('/api/transactions/:id', async (req, res) => {
         res.status(200).json({ transactions: user.transactions });
     } catch (error) {
         res.status(500).json({ message: 'Something went wrong' });
+    }
+})
+
+app.get('/api/transaction/:id', async (req, res) => {
+    try {
+        const transaction = await Transaction.findById(req.params.id);
+        if(!transaction) return res.status(404).json({ message: 'Transaction not found'})
+        res.status(200).json(transaction);
+    } catch (error) {
+        
     }
 })
 

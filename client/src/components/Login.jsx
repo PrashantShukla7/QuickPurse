@@ -7,7 +7,7 @@ const Login = () => {
     const [credential, setCredential] = useState({});
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    const {checkAuth} = useContext(AuthContext)
+    const { checkAuth } = useContext(AuthContext);
 
     const handleInputChange = (e) => {
         setCredential({ ...credential, [e.target.name]: e.target.value });
@@ -31,7 +31,7 @@ const Login = () => {
         <div className="min-h-screen pt-10">
             <h1 className="text-4xl text-center font-bold mb-10">Login</h1>
             <form
-                className="flex flex-col max-w-[40vw] mx-auto bg-stone-200 p-7 rounded-md gap-y-3"
+                className="flex flex-col w-[80vw] sm:max-w-[50vw] md:max-w-[40vw] mx-auto bg-white p-7 rounded-md gap-y-3"
                 onSubmit={handleLogin}
             >
                 {error && (
@@ -52,7 +52,7 @@ const Login = () => {
                     name="phone"
                     placeholder="Enter your mobile number"
                     id="phone"
-                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none p-2 rounded-md border-b-2 border-teal-600 outline-none"
+                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none p-2 rounded-md border-b-2 border-teal-600 outline-none bg-zinc-100"
                     onChange={handleInputChange}
                 />
                 <label
@@ -66,7 +66,7 @@ const Login = () => {
                     name="password"
                     placeholder="Enter your Password"
                     id="password"
-                    className="p-2 rounded-md border-b-2 border-teal-600 outline-none"
+                    className="p-2 rounded-md border-b-2 border-teal-600 outline-none bg-zinc-100"
                     onChange={handleInputChange}
                 />
 

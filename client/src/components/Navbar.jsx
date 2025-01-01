@@ -6,20 +6,25 @@ const Navbar = () => {
     const [loggedIn, setLoggedIn] = useState(false);
     const { isAuthenticated } = useContext(AuthContext);
     useEffect(() => {
-      if (isAuthenticated) setLoggedIn(true);
+        if (isAuthenticated) setLoggedIn(true);
     }, [isAuthenticated]);
 
     return (
         <nav className="flex justify-between items-center px-[5%] py-4 bg-[#ffffff] shadow-[#0000000d]">
             <div>
                 <h2 className="text-[#353f4c] font-bold text-2xl">
-                    <span className="text-[#3B82F6]">Quick</span>Purse
+                    <a href="/">
+                        <span className="text-[#3B82F6]">Quick</span>Purse
+                    </a>
                 </h2>
             </div>
             {loggedIn ? (
                 <ul className="flex gap-x-4 text-[#63748a]">
                     <li className="cursor-pointer hover:text-[#293038]">
-                        <Link to="/">Dashboard</Link>
+                        <Link to="/">Home</Link>
+                    </li>
+                    <li className="cursor-pointer hover:text-[#293038]">
+                        <Link to="/dashboard">Dashboard</Link>
                     </li>
                     <li className="cursor-pointer hover:text-[#293038]">
                         <Link to="/profile">Profile</Link>

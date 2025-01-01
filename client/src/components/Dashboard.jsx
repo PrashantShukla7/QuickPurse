@@ -2,6 +2,17 @@ import React, { useContext, useEffect, useState } from "react";
 import Navbar from "./Navbar";
 import { AuthContext } from "../context/AuthContext";
 import axios from "../utils/axios.js";
+import { Link } from "react-router-dom";
+import {
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    Legend,
+    ResponsiveContainer,
+} from "recharts";
 
 const Dashboard = () => {
     const [transactions, setTransactions] = useState([]);
@@ -32,27 +43,37 @@ const Dashboard = () => {
                 setError("Please enter an amount");
                 return;
             }
+            if (transactionInput.amount > user.balance) {
+                setError("You don't have enough balance in your wallet!");
+                return;
+            }
             if (transactionInput.upiId === undefined) {
                 setError("Please enter a UPI ID");
                 return;
             }
             const res = await axios.post("/send", transactionInput);
             setTransactionSuccess("Money sent successfully!");
+
+            const newTransaction = {
+                sender_upi_id: user.upiId,
+                receiver_upi_id: transactionInput.upiId,
+                amount: transactionInput.amount,
+                date: new Date(), // Optional: Use server response date if available
+            };
+
+            setTransactions((prevTransactions) => [
+                newTransaction,
+                ...prevTransactions,
+            ]);
         } catch (e) {
             setError(e.response?.message || "Something went wrong");
         }
     };
 
-    const getReceiver = async (upiId) => {
-        try {
-            const res = await axios.get(`/user/${upiId}`);
-            console.log(res.data.user.name)
-            return res.data.user.name;
-        } catch (e) {
-            console.log(e);
-            return null;
-        }
-    }
+    const chartData = transactions.map((transaction) => ({
+        amount: transaction.amount,
+        date: transaction.date,
+    }));
 
     return (
         <>
@@ -80,45 +101,63 @@ const Dashboard = () => {
                     ) : (
                         transactions.map((transaction, i) => (
                             <div key={i}>
-                                <div className="flex items-center gap-x-3 mt-7 bg-white rounded p-4 justify-between items-center">
-                                    <div className="flex items-center">
-                                        <div className="w-7 h-7 rounded-full bg-[#f6c23e] mr-3"></div>
-                                        <p className="text-lg">
-                                            {transaction.sender_upi_id === user.upiId
-                                                ? transaction.receiver_upi_id
-                                                : transaction.sender_upi_id}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p
-                                            className={`${
-                                                transaction.sender_upi_id ===
-                                                user.upiId
-                                                    ? "text-[#EF4444]"
-                                                    : "text-[#10B981]"
-                                            } text-lg`}
-                                        >
-                                            {" "}
-                                            <span>
+                                <Link to={`/transaction/${transaction._id}`}>
+                                    <div className="flex items-center gap-x-3 mt-7 bg-white rounded p-4 justify-between items-center hover:bg-zinc-100 cursor-pointer">
+                                        <div className="flex items-center">
+                                            <div className="w-7 h-7 rounded-full bg-[#f6c23e] mr-3"></div>
+                                            <p className="text-lg">
                                                 {transaction.sender_upi_id ===
                                                 user.upiId
-                                                    ? "-"
-                                                    : "+"}
-                                            </span>{" "}
-                                            ₹ {transaction.amount}
-                                        </p>
+                                                    ? transaction.receiver_upi_id
+                                                    : transaction.sender_upi_id}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p
+                                                className={`${
+                                                    transaction.sender_upi_id ===
+                                                    user.upiId
+                                                        ? "text-[#EF4444]"
+                                                        : "text-[#10B981]"
+                                                } text-lg`}
+                                            >
+                                                {" "}
+                                                <span>
+                                                    {transaction.sender_upi_id ===
+                                                    user.upiId
+                                                        ? "-"
+                                                        : "+"}
+                                                </span>{" "}
+                                                ₹ {transaction.amount}
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
+                                </Link>
                             </div>
                         ))
                     )}
                 </div>
+                <div className="mt-10">
+                    <ResponsiveContainer width="100%" height={400}>
+                        <LineChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="timestamp" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Line
+                                type="monotone"
+                                dataKey="amount"
+                                stroke="#8884d8"
+                                dot={false}
+                            />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
 
                 {openModal && (
                     <div className="absolute top-[5%] md:left-[35%] bg-[#ffffff] rounded-md p-10 md:w-[35%] w-full shadow-md">
-                        <h3 className="text-2xl font-semibold">
-                            Send Money
-                        </h3>
+                        <h3 className="text-2xl font-semibold">Send Money</h3>
                         <hr className="bg-[#e2e8f0] h-1 my-3" />
                         {error && (
                             <div className="bg-[#f871716e] px-4 py-2 rounded-md border-2 border-red-600 flex justify-between">
@@ -132,7 +171,9 @@ const Dashboard = () => {
                         )}
                         {transactionSuccess && (
                             <div className="bg-[#88e14c61] px-4 py-2 rounded-md border-2 border-green-600 flex justify-between">
-                                <p className="text-green-700">{transactionSuccess}</p>
+                                <p className="text-green-700">
+                                    {transactionSuccess}
+                                </p>
                                 <i
                                     className="ri-close-large-fill text-green-700 cursor-pointer"
                                     title="close"
