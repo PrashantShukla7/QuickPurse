@@ -54,6 +54,11 @@ const Dashboard = () => {
             const res = await axios.post("/send", transactionInput);
             setTransactionSuccess("Money sent successfully!");
 
+            // updating user balance
+            const updatedBalance =
+                user.balance - Number(transactionInput.amount);
+            user.balance = updatedBalance;
+
             const newTransaction = {
                 sender_upi_id: user.upiId,
                 receiver_upi_id: transactionInput.upiId,
@@ -65,6 +70,9 @@ const Dashboard = () => {
                 newTransaction,
                 ...prevTransactions,
             ]);
+
+            setTransactionInput({});
+            setOpenModal(false);
         } catch (e) {
             setError(e.response?.message || "Something went wrong");
         }
@@ -156,7 +164,7 @@ const Dashboard = () => {
                 </div>
 
                 {openModal && (
-                    <div className="absolute top-[5%] md:left-[35%] bg-[#ffffff] rounded-md p-10 md:w-[35%] w-full shadow-xl">
+                    <div className="absolute top-[5%] md:left-[35%] bg-[#ffffff] rounded-md p-10 md:w-[35%] w-[65%] shadow-xl">
                         <h3 className="text-2xl font-semibold">Send Money</h3>
                         <hr className="bg-[#e2e8f0] h-1 my-3" />
                         {error && (
