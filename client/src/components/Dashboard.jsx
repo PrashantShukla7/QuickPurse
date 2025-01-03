@@ -156,7 +156,7 @@ const Dashboard = () => {
                 </div>
 
                 {openModal && (
-                    <div className="absolute top-[5%] md:left-[35%] bg-[#ffffff] rounded-md p-10 md:w-[35%] w-full shadow-md">
+                    <div className="absolute top-[5%] md:left-[35%] bg-[#ffffff] rounded-md p-10 md:w-[35%] w-full shadow-xl">
                         <h3 className="text-2xl font-semibold">Send Money</h3>
                         <hr className="bg-[#e2e8f0] h-1 my-3" />
                         {error && (

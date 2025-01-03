@@ -71,7 +71,7 @@ const Login = () => {
                 />
 
                 <small className="text-sm">
-                    Already have an account?{" "}
+                    Don't have an account?{" "}
                     <Link to="/signup" className="text-teal-600">
                         Sign Up
                     </Link>
